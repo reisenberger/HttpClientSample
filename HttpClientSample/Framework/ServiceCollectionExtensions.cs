@@ -1,4 +1,6 @@
-﻿namespace HttpClientSample.Framework
+﻿using Polly.CircuitBreaker;
+
+namespace HttpClientSample.Framework
 {
     using System;
     using Microsoft.Extensions.Configuration;
@@ -26,6 +28,7 @@
                 PolicyName.HttpRetry,
                 HttpPolicyExtensions
                     .HandleTransientHttpError()
+                    .Or<BrokenCircuitException>() // Optional: add if you wish the retry policy to retry on encountering a broken circuit.  
                     .WaitAndRetryAsync(
                         policyOptions.HttpRetry.Count,
                         retryAttempt => TimeSpan.FromSeconds(Math.Pow(policyOptions.HttpRetry.BackoffPower, retryAttempt))));
